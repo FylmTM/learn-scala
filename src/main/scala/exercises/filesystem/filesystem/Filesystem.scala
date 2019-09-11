@@ -5,6 +5,8 @@ import java.util.Scanner
 import exercises.filesystem.commands.Command
 import exercises.filesystem.files.Directory
 
+import scala.util.Try
+
 object Filesystem extends App {
 
   val root = Directory.ROOT
@@ -15,6 +17,11 @@ object Filesystem extends App {
     state.show()
 
     val input = scanner.nextLine
-    state = Command.from(input)(state)
+
+    state = Try(Command.from(input)(state))
+      .recover {
+        case e => state.setMessage(s"Error: ${e.getMessage}")
+      }
+      .get
   }
 }
