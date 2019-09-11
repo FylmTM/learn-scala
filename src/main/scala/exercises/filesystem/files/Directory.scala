@@ -1,5 +1,7 @@
 package exercises.filesystem.files
 
+import exercises.filesystem.filesystem.FilesystemException
+
 class Directory(
   override val parentPath: String,
   override val name: String,
@@ -23,7 +25,8 @@ class Directory(
   }
 
   def replaceEntry(entryName: String, newEntry: DirEntry): Directory =
-    new Directory(parentPath, name, contents.filter(!_.name.equals(entryName)) :+ newEntry)
+    new Directory(parentPath, name, contents.map(d => if (d.name.equals(entryName)) newEntry else d))
+//    new Directory(parentPath, name, contents.filter(!_.name.equals(entryName)) :+ newEntry)
 
   def getAllFoldersInPath: List[String] = path
     .substring(1)
@@ -36,6 +39,10 @@ class Directory(
     else findEntry(path.head).asDirectory.findDescendant(path.tail)
 
   override def asDirectory: Directory = this
+
+  override def toString = s"$name/"
+
+  override def asFile: File = throw new FilesystemException(s"Directory $path is not a file")
 }
 
 object Directory {
