@@ -18,9 +18,12 @@ object Filesystem extends App {
 
     val input = scanner.nextLine
 
-    state = Try(Command.from(input)(state))
+    state = Try(Command.from(input)(state.setMessage("")))
       .recover {
-        case e => state.setMessage(s"Error: ${e.getMessage}")
+        case e => {
+          e.printStackTrace()
+          state.setMessage(s"Error: ${e.getMessage}")
+        }
       }
       .get
   }

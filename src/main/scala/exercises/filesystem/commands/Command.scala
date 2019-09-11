@@ -19,7 +19,7 @@ object Command {
   def from(input: String): Command = {
     val tokens: Array[String] = input
       .split("\\s")
-      .filterNot { t => t.isEmpty }
+      .filter { _.nonEmpty }
 
     if (tokens.isEmpty) emptyCommand
     else if (MKDIR.equals(tokens(0))) {
