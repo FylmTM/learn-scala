@@ -2,12 +2,14 @@ package gravitrips
 
 import gravitrips.frontend.Frontend
 
+import scala.annotation.tailrec
+
 object Loop {
-  @scala.annotation.tailrec
+  @tailrec
   def apply(state: State = State())(implicit frontend: Frontend): Unit = {
     frontend.render(state)
 
-    @scala.annotation.tailrec
+    @tailrec
     def doTick(): State = {
       Tick(state, frontend.selectColumn(state)) match {
         case Left(error) =>
