@@ -1,16 +1,9 @@
 package gravitrips
 
-case class GameState(
+case class State(
   field: Field = Field(),
-  currentPlayer: Player = Player1,
-  output: String = ""
-) {
-  def output(output: String): GameState = GameState(field, currentPlayer, output)
-
-  def resetOutput: GameState = output("")
-
-  def error(throwable: Throwable): GameState = output(s"Error: ${throwable.toString}")
-}
+  currentPlayer: Player = Player1
+)
 
 case class Field(
   width: Int,
@@ -32,6 +25,7 @@ case class Field(
   def column(column: Int): Seq[Cell] =
     for (i <- 0 until height) yield cells(column * height + i)
 }
+
 object Field {
   def apply(width: Int = 8, height: Int = 5): Field =
     Field(width, height, Vector.fill(width * height)(EmptyCell))
