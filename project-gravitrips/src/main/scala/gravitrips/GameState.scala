@@ -17,7 +17,8 @@ case class Field(
   height: Int,
   cells: Vector[Cell]
 ) {
-  def throwDisk(player: Player, column: Int): Field = ???
+  def update(column: Int, row: Int, cell: Cell): Field =
+    Field(width, height, cells.updated(column * height + row, cell))
 
   def rows(): Seq[Seq[Cell]] =
     for (i <- 0 until height) yield row(i)

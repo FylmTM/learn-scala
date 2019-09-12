@@ -1,7 +1,7 @@
 package gravitrips
 
 import scala.io.StdIn
-import scala.util.{Failure, Try}
+import scala.util.{Success, Try}
 
 object GetColumn {
   def apply(state: GameState): Try[Int] = {
@@ -16,6 +16,25 @@ object GetColumn {
 }
 
 object ThrowDisk {
-  def apply(state: GameState, column: Int): Try[GameState] =
-    Failure(new IllegalArgumentException("column full"))
+  def apply(state: GameState, columnIndex: Int): Try[GameState] = {
+    def doThrow(): GameState = {
+      val column = state.field.column(columnIndex)
+
+      column.lastIndexOf(EmptyCell) match {
+        case -1 => throw new IllegalArgumentException("Column is full")
+        case row => GameState(
+          state.field.update(columnIndex, row, state.currentPlayer.disk),
+          state.currentPlayer,
+          state.output
+        )
+      }
+    }
+
+    Try(doThrow())
+  }
+}
+
+object SwitchPlayer {
+  def apply(state: GameState): Try[GameState] =
+    Success(GameState(state.field, state.currentPlayer.switch, state.output))
 }

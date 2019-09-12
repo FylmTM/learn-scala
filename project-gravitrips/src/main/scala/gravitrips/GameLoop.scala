@@ -23,5 +23,6 @@ object GameTick {
     for {
       column <- GetColumn(state)
       state <- ThrowDisk(state, column)
+      state <- SwitchPlayer(state)
     } yield state
 }
