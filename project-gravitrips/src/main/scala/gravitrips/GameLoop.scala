@@ -1,12 +1,18 @@
 package gravitrips
 
-import scala.io.StdIn
-import scala.util.{Failure, Success, Try}
+import scala.util.{Failure, Success}
 
-object GameLoop extends ((GameState, Int) => GameState){
+object GameLoop {
+  @scala.annotation.tailrec
+  def apply(gameState: GameState = GameState()): Unit = {
+    GameLoop(GameTick(gameState))
+  }
+}
 
-  def apply(state: GameState, i: Int): GameState = {
-    render(state)
+object GameTick {
+
+  def apply(state: GameState): GameState = {
+    GameStateRenderer(state)
     tick(state.resetOutput) match {
       case Success(newState) => newState
       case Failure(error) => state.error(error)
@@ -18,21 +24,4 @@ object GameLoop extends ((GameState, Int) => GameState){
       column <- GetColumn(state)
       state <- ThrowDisk(state, column)
     } yield state
-
-  private def render(state: GameStateRenderer): Unit = {
-    state.render()
-  }
-}
-
-private object GetColumn {
-  def apply(state: GameState): Try[Int] =
-    Try(StdIn.readInt())
-      .map(c =>
-        if (c > 0 && c <= state.field.width) c
-        else throw new IllegalArgumentException("Invalid column number")
-      )
-}
-
-private object ThrowDisk {
-  def apply(state: GameState, column: Int): Try[GameState] = Failure(new IllegalArgumentException("column full"))
 }
