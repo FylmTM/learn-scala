@@ -5,9 +5,11 @@ object GameStateRenderer {
     state.field
       .rows()
       .foreach(RowRenderer(_))
+    println()
 
     if (state.output.nonEmpty) {
       println(state.output)
+      println()
     }
   }
 }

@@ -1,11 +1,15 @@
 package gravitrips
 
-case class GameState(field: Field = Field(), output: String = "") {
-  def output(output: String): GameState = GameState(field, output)
+case class GameState(
+  field: Field = Field(),
+  currentPlayer: Player = Player1,
+  output: String = ""
+) {
+  def output(output: String): GameState = GameState(field, currentPlayer, output)
 
   def resetOutput: GameState = output("")
 
-  def error(throwable: Throwable): GameState = output(throwable.toString)
+  def error(throwable: Throwable): GameState = output(s"Error: ${throwable.toString}")
 }
 
 case class Field(
@@ -52,10 +56,14 @@ case object Player1 extends Player {
   override def switch: Player = Player2
 
   override def disk: Disk = Player1Disk
+
+  override def toString: String = "Player 1"
 }
 
 case object Player2 extends Player {
   override def switch: Player = Player1
 
   override def disk: Disk = Player2Disk
+
+  override def toString: String = "Player 2"
 }

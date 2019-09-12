@@ -4,13 +4,15 @@ import scala.io.StdIn
 import scala.util.{Failure, Try}
 
 object GetColumn {
-  def apply(state: GameState): Try[Int] =
+  def apply(state: GameState): Try[Int] = {
+    print(s"${state.currentPlayer} selecting column: ")
     Try(StdIn.readInt())
       .map(_ - 1)
       .map(c =>
-        if (c > 0 && c <= state.field.width) c
+        if (c >= 0 && c < state.field.width) c
         else throw new IllegalArgumentException("Invalid column number")
       )
+  }
 }
 
 object ThrowDisk {
