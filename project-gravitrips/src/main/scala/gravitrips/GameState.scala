@@ -15,7 +15,17 @@ case class Field(
 ) {
   def throwDisk(player: Player, column: Int): Field = ???
 
-  private def getColumn(column: Int): Vector[Cell] = cells.slice(column - 1 * height, column * height)
+  def rows(): Seq[Seq[Cell]] =
+    for (i <- 0 until height) yield row(i)
+
+  def columns(): Seq[Seq[Cell]] =
+    for (i <- 0 until width) yield column(i)
+
+  def row(row: Int): Seq[Cell] =
+    for (i <- 0 until width) yield cells(height * i + row)
+
+  def column(column: Int): Seq[Cell] =
+    for (i <- 0 until height) yield cells(column * height + i)
 }
 object Field {
   def apply(width: Int = 8, height: Int = 5): Field =

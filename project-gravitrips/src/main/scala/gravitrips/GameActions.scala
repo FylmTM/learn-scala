@@ -6,6 +6,7 @@ import scala.util.{Failure, Try}
 object GetColumn {
   def apply(state: GameState): Try[Int] =
     Try(StdIn.readInt())
+      .map(_ - 1)
       .map(c =>
         if (c > 0 && c <= state.field.width) c
         else throw new IllegalArgumentException("Invalid column number")
