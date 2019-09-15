@@ -7,6 +7,23 @@ import scala.util.{Failure, Success, Try}
 
 object ConsoleFrontend extends Frontend {
 
+  override def handleWinner(winner: Winner): Unit = {
+    val state = winner.state
+    render(state, winner.paths.flatten)
+
+    val color = state.currentPlayer match {
+      case Player1 => Console.BLUE
+      case Player2 => Console.GREEN
+    }
+    val playerName = state.currentPlayer match {
+      case Player1 => "Player 1"
+      case Player2 => "Player 2"
+    }
+
+    println(s"$color$playerName wins!${Console.RESET}")
+  }
+
+
   override def handleError(error: RecoverableError): Unit = {
     print(Console.RED)
     error match {
@@ -53,32 +70,38 @@ object ConsoleFrontend extends Frontend {
     }
   }
 
-  override def render(state: State): Unit = stateRenderer(state)
-
-  private def stateRenderer(state: State): Unit = {
+  override def render(state: State, highlighted: Seq[LocatableCell] = Seq()): Unit = {
     println()
     for (i <- 1 to state.field.width) {
       print(s" $i")
     }
     println()
-    state.field
-      .rows()
-      .foreach(rowRenderer)
+
+    for (rowIndex <- 0 until state.field.height) {
+      print("│")
+      val row = state.field.row(rowIndex)
+
+      for (columnIndex <- 0 until state.field.width) {
+        cellRenderer(
+          rowIndex,
+          columnIndex,
+          row(columnIndex),
+          highlighted.exists(c => c.column.equals(columnIndex) && c.row.equals(rowIndex))
+        )
+      }
+      println()
+    }
     println()
   }
 
-  private def rowRenderer(row: Seq[Cell]): Unit = {
-    print("│")
-    row.foreach(cellRenderer)
-    println()
-  }
-
-  private def cellRenderer(cell: Cell): Unit = {
+  private def cellRenderer(rowIndex: Int, columnIndex: Int, cell: Cell, isHighlighted: Boolean): Unit = {
+    if (isHighlighted) print(Console.MAGENTA_B)
     cell match {
       case EmptyCell => print(" ")
-      case Player1Disk => print(s"${Console.BLUE}●${Console.RESET}")
-      case Player2Disk => print(s"${Console.GREEN}●${Console.RESET}")
+      case Player1Disk => print(s"${Console.BLUE}●")
+      case Player2Disk => print(s"${Console.GREEN}●")
     }
+    print(Console.RESET)
     print("│")
   }
 }

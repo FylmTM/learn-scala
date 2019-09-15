@@ -2,8 +2,7 @@ package gravitrips
 
 case class State(
   field: Field = Field(),
-  currentPlayer: Player = Player1,
-  isWinner: Boolean = false
+  currentPlayer: Player = Player1
 )
 
 case class Field(
@@ -16,8 +15,9 @@ case class Field(
 
   def contains(cell: Cell): Boolean = cells.contains(cell)
 
-  def apply(column: Int, row: Int): Cell =
-    cells(column * height + row)
+  def apply(column: Int, row: Int): Option[LocatableCell] =
+    if (column < 0 || row < 0) None
+    else cells.lift(column * height + row).map(LocatableCell(column, row, _))
 
   def row(row: Int): Seq[Cell] =
     for (i <- 0 until width) yield cells(height * i + row)
@@ -33,7 +33,7 @@ case class Field(
 }
 
 object Field {
-  def apply(width: Int = 3, height: Int = 3): Field =
+  def apply(width: Int = 8, height: Int = 5): Field =
     Field(width, height, Vector.fill(width * height)(EmptyCell))
 }
 
@@ -46,6 +46,8 @@ case object EmptyCell extends Cell
 case object Player1Disk extends Disk
 
 case object Player2Disk extends Disk
+
+case class LocatableCell(column: Int, row: Int, cell: Cell)
 
 sealed trait Player {
   def disk: Disk

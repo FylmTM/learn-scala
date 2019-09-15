@@ -1,6 +1,10 @@
 package gravitrips
 
-sealed trait Error
+sealed trait Result
+
+case class Winner(state: State, paths: Seq[Seq[LocatableCell]]) extends Result
+
+sealed trait Error extends Result
 
 sealed trait RecoverableError extends Error
 
