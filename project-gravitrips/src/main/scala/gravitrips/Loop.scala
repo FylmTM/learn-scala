@@ -10,16 +10,21 @@ object Loop {
     frontend.render(state)
 
     @tailrec
-    def doTick(): State = {
+    def doTick(): Either[UnrecoverableError, State] = {
       Tick(state, frontend.selectColumn(state)) match {
-        case Left(error) =>
+        case Left(error: UnrecoverableError) => Left(error)
+        case Left(error: RecoverableError) => {
           frontend.handleError(error)
           doTick()
-        case Right(newState) => newState
+        }
+        case Right(newState) => Right(newState)
       }
     }
 
-    Loop(doTick())
+    doTick() match {
+      case Left(error) => frontend.handleUnrecoverableError(state, error)
+      case Right(newState) => Loop(newState)
+    }
   }
 }
 
@@ -27,25 +32,9 @@ object Tick {
   def apply(state: State, columnIndex: Int): Either[Error, State] = {
     for {
       state <- ThrowDisk(state, columnIndex)
+      state <- CheckWinner(state, columnIndex)
+      state <- CheckNoMoreMoves(state)
       state <- SwitchPlayer(state)
     } yield state
   }
-}
-
-private object ThrowDisk {
-  def apply(state: State, columnIndex: Int): Either[Error, State] = {
-    val column = state.field.column(columnIndex)
-    column.lastIndexOf(EmptyCell) match {
-      case -1 => Left(ColumnFullError)
-      case rowIndex => Right(State(
-        state.field.update(columnIndex, rowIndex, state.currentPlayer.disk),
-        state.currentPlayer
-      ))
-    }
-  }
-}
-
-private object SwitchPlayer {
-  def apply(state: State): Either[Error, State] =
-    Right(State(state.field, state.currentPlayer.switch))
 }

@@ -1,13 +1,13 @@
 package gravitrips.frontend
 
-import gravitrips.{Cell, ColumnFullError, EmptyCell, Error, InvalidColumnIndex, InvalidInput, Player1, Player1Disk, Player2, Player2Disk, State}
+import gravitrips._
 
 import scala.io.StdIn
 import scala.util.{Failure, Success, Try}
 
 object ConsoleFrontend extends Frontend {
 
-  override def handleError(error: Error): Unit = {
+  override def handleError(error: RecoverableError): Unit = {
     print(Console.RED)
     error match {
       case ColumnFullError => print(s"Column is full!")
@@ -17,13 +17,26 @@ object ConsoleFrontend extends Frontend {
     println(Console.RESET)
   }
 
+
+  override def handleUnrecoverableError(state: State, error: UnrecoverableError): Unit = {
+    error match {
+      case NoMoreMoves(state) =>
+        render(state)
+        println(s"${Console.RED}No more moves!${Console.RESET}")
+    }
+  }
+
   @scala.annotation.tailrec
   override def selectColumn(state: State): Int = {
     val color = state.currentPlayer match {
       case Player1 => Console.BLUE
       case Player2 => Console.GREEN
     }
-    print(s"$color${state.currentPlayer} selecting column: ${Console.RESET}")
+    val playerName = state.currentPlayer match {
+      case Player1 => "Player 1"
+      case Player2 => "Player 2"
+    }
+    print(s"$color$playerName selecting column: ${Console.RESET}")
 
     val input = Try(StdIn.readInt()) match {
       case Failure(_) => Left(InvalidInput)

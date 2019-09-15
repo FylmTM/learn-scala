@@ -1,12 +1,14 @@
 package gravitrips.frontend
 
-import gravitrips.{Error, State}
+import gravitrips.{RecoverableError, State, UnrecoverableError}
 
 trait Frontend {
   def render(state: State): Unit
 
   def selectColumn(state: State): Int
 
-  def handleError(error: Error): Unit
+  def handleError(error: RecoverableError): Unit
+
+  def handleUnrecoverableError(state: State, error: UnrecoverableError): Unit
 }
 
