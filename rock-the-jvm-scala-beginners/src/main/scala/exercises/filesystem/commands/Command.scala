@@ -2,11 +2,7 @@ package exercises.filesystem.commands
 
 import exercises.filesystem.filesystem.State
 
-trait Command {
-
-  def apply(state: State): State
-
-}
+trait Command extends (State => State)
 
 object Command {
 
@@ -20,6 +16,8 @@ object Command {
   val PWD = "pwd"
   val CD = "cd"
   val RM = "rm"
+  val ECHO = "echo"
+  val CAT = "cat"
 
   def from(input: String): Command = {
     val tokens: Array[String] = input
@@ -54,6 +52,12 @@ object Command {
     } else if (RM.equals(command)) {
       if (tokens.length < 2) incompleteCommand(RM)
       else new Rm(tokens(1))
+    } else if (ECHO.equals(command)) {
+      if (tokens.length < 2) incompleteCommand(ECHO)
+      else new Echo(tokens.tail)
+    } else if (CAT.equals(command)) {
+      if (tokens.length < 2) incompleteCommand(CAT)
+      else new Cat(tokens(1))
     }
     else new UnknownCommand(input)
   }
