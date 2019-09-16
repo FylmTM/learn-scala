@@ -26,7 +26,10 @@ class Directory(
 
   def replaceEntry(entryName: String, newEntry: DirEntry): Directory =
     new Directory(parentPath, name, contents.map(d => if (d.name.equals(entryName)) newEntry else d))
-//    new Directory(parentPath, name, contents.filter(!_.name.equals(entryName)) :+ newEntry)
+
+  def removeEntry(entryName: String): Directory =
+    if (!hasEntry(entryName)) this
+    else new Directory(parentPath, name, contents.filter(!_.name.equals(entryName)))
 
   def getAllFoldersInPath: List[String] = path
     .substring(1)
@@ -38,11 +41,21 @@ class Directory(
     if (path.isEmpty) this
     else findEntry(path.head).asDirectory.findDescendant(path.tail)
 
+  def findDescendant(relativePath: String): Directory =
+    if (relativePath.isEmpty) this
+    else findDescendant(relativePath.split(Directory.SEPARATOR).toList)
+
+  def isRoot: Boolean = parentPath.isEmpty
+
   override def asDirectory: Directory = this
 
   override def toString = s"$name/"
 
   override def asFile: File = throw new FilesystemException(s"Directory $path is not a file")
+
+  def isDirectory: Boolean = true
+
+  def isFile: Boolean = false
 }
 
 object Directory {
