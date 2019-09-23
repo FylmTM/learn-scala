@@ -15,11 +15,19 @@ abstract class MyList[+A] {
 
   def ++[B >: A](list: MyList[B]): MyList[B]
 
-  def map[B](transformer: MyTransformer[A, B]): MyList[B]
+  def map[B](transformer: A => B): MyList[B]
 
-  def flatMap[B](transformer: MyTransformer[A, MyList[B]]): MyList[B]
+  def flatMap[B](transformer: A => MyList[B]): MyList[B]
 
-  def filter(predicate: MyPredicate[A]): MyList[A]
+  def filter(predicate: A => Boolean): MyList[A]
+
+  def forEach(f: A => Unit)
+
+  def sort(compare: (A, A) => Int): MyList[A]
+
+  def zipWith[B, C](list: MyList[B], zip: (A, B) => C): MyList[C]
+
+  def fold[B](start: B)(operator: (B, A) => B): B
 }
 
 case object Empty extends MyList {
@@ -30,17 +38,30 @@ case object Empty extends MyList {
 
   override def isEmpty: Boolean = true
 
-  override def add[A](element: A): MyList[A] = new Cons(element, Empty)
+  override def add[A](element: A): MyList[A] = Cons(element, Empty)
 
   override def printElements: String = ""
 
-  override def map[B](transformer: MyTransformer[Nothing, B]): MyList[B] = Empty
+  override def map[B](transformer: Nothing => B): MyList[B] = Empty
 
-  override def flatMap[B](transformer: MyTransformer[Nothing, MyList[B]]): MyList[B] = Empty
+  override def flatMap[B](transformer: Nothing => MyList[B]): MyList[B] = Empty
 
-  override def filter(predicate: MyPredicate[Nothing]): MyList[Nothing] = Empty
+  override def filter(predicate: Nothing => Boolean): MyList[Nothing] = Empty
 
   override def ++[B >: Nothing](list: MyList[B]): MyList[B] = list
+
+  override def forEach(f: Nothing => Unit): Unit = ()
+
+  override def sort(compare: (Nothing, Nothing) => Int): MyList[Nothing] = Empty
+
+  override def zipWith[B, C](list: MyList[B], zip: (Nothing, B) => C): MyList[C] = {
+    if (!list.isEmpty) throw new RuntimeException("not same lengt")
+    else Empty
+  }
+
+  override def fold[B](start: B)(operator: (B, Nothing) => B): B = {
+    start
+  }
 }
 
 case class Cons[+A](h: A, t: MyList[A]) extends MyList[A] {
@@ -57,18 +78,43 @@ case class Cons[+A](h: A, t: MyList[A]) extends MyList[A] {
     if (t.isEmpty) head.toString
     else head + " " + t.printElements
 
-  override def map[B](transformer: MyTransformer[A, B]): MyList[B] =
-    new Cons[B](transformer.transform(this.head), this.tail.map(transformer))
+  override def map[B](transformer: A => B): MyList[B] =
+    new Cons[B](transformer(this.head), this.tail.map(transformer))
 
-  override def flatMap[B](transformer: MyTransformer[A, MyList[B]]): MyList[B] = {
-    transformer.transform(head) ++ tail.flatMap(transformer)
+  override def flatMap[B](transformer: A => MyList[B]): MyList[B] = {
+    transformer(head) ++ tail.flatMap(transformer)
   }
 
-  override def filter(predicate: MyPredicate[A]): MyList[A] =
-    if (predicate.test(this.head)) Cons(this.head, this.tail.filter(predicate))
+  override def filter(predicate: A => Boolean): MyList[A] =
+    if (predicate(this.head)) Cons(this.head, this.tail.filter(predicate))
     else this.tail.filter(predicate)
 
   override def ++[B >: A](list: MyList[B]): MyList[B] = Cons(h, t ++ list)
+
+  override def forEach(f: A => Unit): Unit = {
+    f(head)
+    tail.forEach(f)
+  }
+
+  override def sort(compare: (A, A) => Int): MyList[A] = {
+    def insert(x: A, sortedList: MyList[A]): MyList[A] =
+      if (sortedList.isEmpty) Cons(x, Empty)
+      else if (compare(x, sortedList.head) <= 0) Cons(x, sortedList)
+      else Cons(sortedList.head, insert(x, sortedList.tail))
+
+    val sortedTail = t.sort(compare)
+
+    insert(h, sortedTail)
+  }
+
+  override def zipWith[B, C](list: MyList[B], zip: (A, B) => C): MyList[C] = {
+    if (list.isEmpty) throw new RuntimeException("not same length")
+    else Cons(zip(h, list.head), tail.zipWith(list.tail, zip))
+  }
+
+  override def fold[B](start: B)(operator: (B, A) => B): B = {
+    t.fold(operator(start, h))(operator)
+  }
 }
 
 class Animal
@@ -77,26 +123,21 @@ class Cat extends Animal
 
 class Dog extends Animal
 
-
-trait MyPredicate[-T] {
-  def test(e: T): Boolean
-}
-
-trait MyTransformer[-A, B] {
-  def transform(e: A): B
-}
-
 object MylistApp extends App {
-  val list = Cons(1, Cons(2, Cons(3, Cons(4, new Cons(5, new Cons(6, Empty))))))
+  val list = Cons(1, Cons(2, Cons(3, Cons(4, Cons(5, Cons(6, Empty))))))
 
   println(list)
-  println(list.map(new MyTransformer[Int, Int] {
-    override def transform(e: Int): Int = e * 2
-  }))
-  println(list.filter(new MyPredicate[Int] {
-    override def test(e: Int): Boolean = e % 2 == 0
-  }))
-  println(list.flatMap(new MyTransformer[Int, MyList[Int]] {
-    override def transform(e: Int): MyList[Int] = new Cons(e, new Cons(e, Empty))
-  }))
+  println(list.map((e: Int) => e * 2))
+  println(list.filter((e: Int) => e % 2 == 0))
+  println(list.flatMap((e: Int) => Cons(e, Cons(e, Empty))))
+
+  list.forEach(println)
+  println(list.sort((x, y) => y - x))
+
+  val l1 = Cons(1, Cons(2, Empty))
+  val l2 = Cons("hello", Cons("scala", Empty))
+
+  println(l1.zipWith[String, String](l2, _ + " - " + _))
+
+  println(list.fold(0)(_ + _))
 }
