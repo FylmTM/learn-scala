@@ -140,4 +140,9 @@ object MylistApp extends App {
   println(l1.zipWith[String, String](l2, _ + " - " + _))
 
   println(list.fold(0)(_ + _))
+
+  for {
+    n <- l1
+    s <- l2
+  } yield s"$n - $s"
 }
