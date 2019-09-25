@@ -77,4 +77,11 @@ object PatternMatching extends App {
   val secondElementSpecial = aList match {
     case Cons(_, Cons(specialElement, _)) if specialElement % 2 == 0 =>
   }
+
+  // ----
+
+  List(1, 2, 3).map {
+    case 1 => "the one"
+    case _ => "everything else"
+  }
 }
