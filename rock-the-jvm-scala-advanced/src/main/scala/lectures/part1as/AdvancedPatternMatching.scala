@@ -2,10 +2,10 @@ package lectures.part1as
 
 object AdvancedPatternMatching extends App {
   val numbers = List(1)
-  val description = numbers match {
-    case head :: Nil => s"the only element is $head"
-  }
-  println(description)
+//  val description = numbers match {
+//    case head :: Nil => s"the only element is $head"
+//  }
+//  println(description)
 
   class Person(val name: String, val age: Int)
 
@@ -55,7 +55,7 @@ object AdvancedPatternMatching extends App {
   val either = Or(2, "two")
   val humanDescription = either match {
     case Or(number, string) => s"$number is written as $string"
-    case number Or string => s"$number is written as $string"
+//    case number Or string => s"$number is written as $string"
   }
   println(humanDescription)
 
