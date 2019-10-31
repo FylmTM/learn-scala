@@ -92,5 +92,23 @@ object Intro extends App {
       println(s"Hello from thread $i")
     })
 
-  inceptionThreads(50).start()
+  //inceptionThreads(50).start()
+
+  //val bell = new Object
+  //(1 to 10).foreach { i =>
+  //  new Thread(() => {
+  //    bell.synchronized {
+  //      println(s"$i waiting...")
+  //      Thread.sleep(500)
+  //      bell.wait()
+  //      println(s"$i done")
+  //    }
+  //  }).start()
+  //}
+  //new Thread(() => {
+  //  Thread.sleep(2000)
+  //  bell.synchronized {
+  //    bell.notifyAll()
+  //  }
+  //}).start()
 }
